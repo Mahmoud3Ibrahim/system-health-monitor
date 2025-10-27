@@ -16,6 +16,7 @@ import psutil
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 CSV_PATH = PROJECT_ROOT / "system_report.csv"
 BUFFER_PATH = PROJECT_ROOT / "system_report.buffer"
+ALERT_LOG_PATH = PROJECT_ROOT / "alerts.log"
 CSV_FIELDS = [
     "timestamp",
     "cpu_percent",
@@ -29,6 +30,11 @@ CSV_FIELDS = [
     "net_bytes_recv",
     "uptime_seconds",
 ]
+ALERT_THRESHOLDS = {
+    "cpu_percent": 90.0,
+    "memory_percent": 85.0,
+    "disk_percent": 90.0,
+}
 
 
 @dataclass
@@ -132,6 +138,25 @@ def save_csv(stats: Dict[str, object], csv_path: Path | None = None, buffer_path
         return False
 
 
+def check_thresholds(stats: Dict[str, object]) -> List[str]:
+    """Return alert messages for metrics that breach defined thresholds."""
+    alerts: List[str] = []
+    for metric, limit in ALERT_THRESHOLDS.items():
+        value = float(stats.get(metric, 0.0))
+        if value > limit:
+            alerts.append(f"{metric} at {value:.1f}% exceeds {limit:.1f}%")
+    return alerts
+
+
+def _log_alerts(alerts: List[str], log_path: Path = ALERT_LOG_PATH) -> None:
+    """Persist alerts to the alert log with timestamps."""
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    timestamp = datetime.now(timezone.utc).isoformat()
+    with log_path.open("a") as log_file:
+        for alert in alerts:
+            log_file.write(f"{timestamp} - {alert}\n")
+
+
 def main() -> None:
     stats = get_system_stats()
     print("Current system snapshot:")
@@ -145,6 +170,16 @@ def main() -> None:
         print(f"Saved metrics to {CSV_PATH}")
     else:
         print(f"Write failed; buffered data at {BUFFER_PATH}")
+
+    alerts = check_thresholds(stats)
+    if alerts:
+        print("Threshold alerts detected:")
+        for alert in alerts:
+            print(f" - {alert}")
+        _log_alerts(alerts)
+        print(f"Logged alerts to {ALERT_LOG_PATH}")
+    else:
+        print("No threshold alerts detected.")
 
 
 if __name__ == "__main__":
