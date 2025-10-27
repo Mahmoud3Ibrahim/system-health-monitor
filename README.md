@@ -9,6 +9,13 @@ A lightweight, production-ready agent that captures local system telemetry, pers
 - Auto-generated HTML snapshot (`report.html`) plus scriptable sample capture for docs/screenshots.
 - Modular code ready for cron/systemd scheduling, container builds, or external alert transports.
 
+## Architecture Overview
+- `agent/dto`: dataclasses and typed dicts for telemetry.
+- `agent/business`: psutil collectors plus the MonitorService orchestrator.
+- `agent/io`: CSV writer, HTML renderer, alert logger, and SMTP client.
+- `agent/validation`: threshold policies (extensible for future rules).
+- `tests`: pytest suite ready for additional unit/contract cases.
+
 ## Requirements
 - Python 3.10+
 - `psutil` (install via `pip install -r requirements.txt`)
@@ -80,3 +87,5 @@ A lightweight, production-ready agent that captures local system telemetry, pers
 1. Add Telegram or Slack webhook alerts for on-call redundancy.
 2. Package the agent into a Docker image with a minimal base and baked-in scheduler.
 3. Stream metrics to a TSDB (InfluxDB/Prometheus) for long-term trending.
+
+
