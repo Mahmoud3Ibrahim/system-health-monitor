@@ -19,3 +19,5 @@ alerts.log
 # OS files
 .DS_Store
 Thumbs.db
+!system_report.csv
+!report.html
