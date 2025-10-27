@@ -4,11 +4,31 @@ Local system health monitor utilities.
 
 from __future__ import annotations
 
+import csv
+import json
 from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Dict, List
 
 import psutil
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+CSV_PATH = PROJECT_ROOT / "system_report.csv"
+BUFFER_PATH = PROJECT_ROOT / "system_report.buffer"
+CSV_FIELDS = [
+    "timestamp",
+    "cpu_percent",
+    "memory_percent",
+    "memory_used",
+    "memory_total",
+    "disk_percent",
+    "disk_used",
+    "disk_total",
+    "net_bytes_sent",
+    "net_bytes_recv",
+    "uptime_seconds",
+]
 
 
 @dataclass
@@ -50,7 +70,6 @@ def get_system_stats(top_n: int = 5) -> Dict[str, object]:
     net = psutil.net_io_counters()
 
     uptime_seconds = int(datetime.now(timezone.utc).timestamp() - psutil.boot_time())
-
     top_processes = [asdict(proc) for proc in _collect_top_processes(limit=top_n)]
 
     return {
@@ -69,8 +88,64 @@ def get_system_stats(top_n: int = 5) -> Dict[str, object]:
     }
 
 
-if __name__ == "__main__":
+def _write_csv_rows(csv_path: Path, rows: List[Dict[str, object]]) -> None:
+    """Append rows to the CSV, writing the header when needed."""
+    csv_path.parent.mkdir(parents=True, exist_ok=True)
+    file_exists = csv_path.exists()
+    with csv_path.open("a", newline="") as csv_file:
+        writer = csv.DictWriter(csv_file, fieldnames=CSV_FIELDS)
+        if not file_exists:
+            writer.writeheader()
+        for row in rows:
+            writer.writerow({field: row.get(field, "") for field in CSV_FIELDS})
+
+
+def _load_buffer(buffer_path: Path) -> List[Dict[str, object]]:
+    if not buffer_path.exists():
+        return []
+    with buffer_path.open() as buffer_file:
+        return [json.loads(line) for line in buffer_file if line.strip()]
+
+
+def _persist_buffer(buffer_path: Path, rows: List[Dict[str, object]]) -> None:
+    buffer_path.parent.mkdir(parents=True, exist_ok=True)
+    with buffer_path.open("w") as buffer_file:
+        for row in rows:
+            buffer_file.write(json.dumps(row) + "\n")
+
+
+def save_csv(stats: Dict[str, object], csv_path: Path | None = None, buffer_path: Path | None = None) -> bool:
+    """Save stats to CSV, buffering locally if the write fails."""
+    csv_target = Path(csv_path) if csv_path else CSV_PATH
+    buffer_target = Path(buffer_path) if buffer_path else BUFFER_PATH
+
+    buffered_rows = _load_buffer(buffer_target)
+    rows_to_write = buffered_rows + [stats]
+
+    try:
+        _write_csv_rows(csv_target, rows_to_write)
+        if buffer_target.exists():
+            buffer_target.unlink()
+        return True
+    except OSError:
+        _persist_buffer(buffer_target, rows_to_write)
+        return False
+
+
+def main() -> None:
     stats = get_system_stats()
     print("Current system snapshot:")
     for key, value in stats.items():
-        print(f"{key}: {value}")
+        if key == "top_processes":
+            print(f"{key}: {len(value)} entries")
+        else:
+            print(f"{key}: {value}")
+
+    if save_csv(stats):
+        print(f"Saved metrics to {CSV_PATH}")
+    else:
+        print(f"Write failed; buffered data at {BUFFER_PATH}")
+
+
+if __name__ == "__main__":
+    main()
