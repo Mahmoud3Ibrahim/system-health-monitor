@@ -253,6 +253,14 @@ def update_html_report(stats: Dict[str, object], alerts: List[str], report_path:
     return target
 
 
+def _print_run_guidance() -> None:
+    """Output local run, Gmail app password, and roadmap guidance."""
+    print("\nRun locally:")
+    print(" python -m agent.monitor")
+    print("Gmail App Password: https://myaccount.google.com/apppasswords -> Mail -> Custom name -> copy the 16-char token.")
+    print("Recommended next steps: 1) Add Telegram alerts  2) Dockerize this monitor for portability.")
+
+
 def main() -> None:
     stats = get_system_stats()
     print("Current system snapshot:")
@@ -283,6 +291,7 @@ def main() -> None:
 
     report_path = update_html_report(stats, alerts)
     print(f"Updated HTML report at {report_path}")
+    _print_run_guidance()
 
 
 if __name__ == "__main__":
