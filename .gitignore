@@ -1,0 +1,21 @@
+# Python artifacts
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Virtual environments
+.env/
+env/
+venv/
+.venv/
+
+# Credentials / large outputs
+*.env
+*.log
+system_report.csv
+report.html
+alerts.log
+
+# OS files
+.DS_Store
+Thumbs.db
