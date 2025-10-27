@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>System Health Report</title>
+<style>
+ body { font-family: Arial, sans-serif; margin: 2rem; background: #f4f6f8; }
+ .card { background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); margin-bottom: 1.5rem; }
+ table { width: 100%; border-collapse: collapse; }
+ th, td { text-align: left; padding: 0.5rem; border-bottom: 1px solid #e1e5eb; }
+ th { background: #f0f3f7; }
+ .metrics { display: flex; gap: 1rem; flex-wrap: wrap; }
+ .metric { flex: 1 1 200px; background: #eef2f7; padding: 1rem; border-radius: 6px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>System Health Report</h1>
+  <p>Generated at 2025-10-27T02:57:13.819615+00:00</p>
+  <div class="metrics">
+    <div class="metric"><strong>CPU</strong><br>42.5%</div>
+    <div class="metric"><strong>Memory</strong><br>63.2%</div>
+    <div class="metric"><strong>Disk</strong><br>71.4%</div>
+    <div class="metric"><strong>Uptime</strong><br>86400s</div>
+  </div>
+</div>
+<div class="card">
+  <h2>Active Alerts</h2>
+  <ul><li>cpu_percent at 98.2% exceeds 90.0%</li><li>disk_percent at 92.0% exceeds 90.0%</li></ul>
+</div>
+<div class="card">
+  <h2>Top Processes</h2>
+  <table>
+    <thead><tr><th>PID</th><th>Name</th><th>CPU%</th><th>Mem%</th></tr></thead>
+    <tbody>
+      <tr><td>1001</td><td>python.exe</td><td>35.2</td><td>12.6</td></tr>
+<tr><td>2268</td><td>code.exe</td><td>18.4</td><td>6.3</td></tr>
+<tr><td>4321</td><td>chrome.exe</td><td>12.1</td><td>8.1</td></tr>
+    </tbody>
+  </table>
+</div>
+</body>
+</html>
