@@ -6,8 +6,11 @@ from __future__ import annotations
 
 import csv
 import json
+import os
+import smtplib
 from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
+from email.message import EmailMessage
 from pathlib import Path
 from typing import Dict, List
 
@@ -35,6 +38,8 @@ ALERT_THRESHOLDS = {
     "memory_percent": 85.0,
     "disk_percent": 90.0,
 }
+SMTP_SERVER = "smtp.gmail.com"
+SMTP_PORT = 587
 
 
 @dataclass
@@ -157,6 +162,40 @@ def _log_alerts(alerts: List[str], log_path: Path = ALERT_LOG_PATH) -> None:
             log_file.write(f"{timestamp} - {alert}\n")
 
 
+def send_email(alerts: List[str], stats: Dict[str, object], sender: str | None = None, recipient: str | None = None) -> bool:
+    """Send an alert email through Gmail SMTP using env configured credentials."""
+    sender_email = sender or os.getenv("SENDER_EMAIL")
+    password = os.getenv("APP_PASSWORD")
+    recipient_email = recipient or os.getenv("RECIPIENT_EMAIL")
+
+    if not sender_email or not password or not recipient_email:
+        print("Email credentials missing; skipping email alert.")
+        return False
+
+    subject = "System health alert"
+    lines = ["The following thresholds were exceeded:"] + [f" - {alert}" for alert in alerts]
+    lines.append("\nKey metrics snapshot:")
+    for key in ("cpu_percent", "memory_percent", "disk_percent", "uptime_seconds"):
+        lines.append(f" * {key}: {stats.get(key)}")
+    body = "\n".join(lines)
+
+    message = EmailMessage()
+    message["Subject"] = subject
+    message["From"] = sender_email
+    message["To"] = recipient_email
+    message.set_content(body)
+
+    try:
+        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+            server.starttls()
+            server.login(sender_email, password)
+            server.send_message(message)
+        return True
+    except smtplib.SMTPException as exc:
+        print(f"Failed to send email alerts: {exc}")
+        return False
+
+
 def main() -> None:
     stats = get_system_stats()
     print("Current system snapshot:")
@@ -178,6 +217,10 @@ def main() -> None:
             print(f" - {alert}")
         _log_alerts(alerts)
         print(f"Logged alerts to {ALERT_LOG_PATH}")
+        if send_email(alerts, stats):
+            print("Email alerts dispatched via Gmail SMTP.")
+        else:
+            print("Email alerts skipped or failed.")
     else:
         print("No threshold alerts detected.")
 
