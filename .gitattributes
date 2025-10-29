@@ -1,0 +1,8 @@
+# Ignore build and binary files when detecting languages
+build/* linguist-vendored
+dist/* linguist-vendored
+tools/* linguist-vendored
+*.exe linguist-vendored
+*.dll linguist-vendored
+*.iss linguist-vendored
+*.bat linguist-vendored
