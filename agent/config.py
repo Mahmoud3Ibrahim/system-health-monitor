@@ -2,9 +2,19 @@
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
+def _detect_project_root() -> Path:
+    """Return the project root whether running from source or a frozen bundle."""
+    if getattr(sys, "frozen", False):
+        # When packaged with PyInstaller, use the folder that hosts the executable.
+        return Path(sys.executable).resolve().parent
+    return Path(__file__).resolve().parents[1]
+
+
+PROJECT_ROOT = _detect_project_root()
 CSV_PATH = PROJECT_ROOT / "system_report.csv"
 BUFFER_PATH = PROJECT_ROOT / "system_report.buffer"
 ALERT_LOG_PATH = PROJECT_ROOT / "alerts.log"

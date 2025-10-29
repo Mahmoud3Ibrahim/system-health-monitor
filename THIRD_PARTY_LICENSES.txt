@@ -1,0 +1,27 @@
+============================================================
+psutil
+============================================================
+License: BSD 3-Clause License
+Project URL: https://github.com/giampaolo/psutil
+License Text: https://github.com/giampaolo/psutil/blob/master/LICENSE
+
+============================================================
+PyInstaller
+============================================================
+License: GNU General Public License v2 (GPLv2) with a special exception
+Project URL: https://www.pyinstaller.org/
+License Text: https://github.com/pyinstaller/pyinstaller/blob/develop/COPYING.txt
+
+============================================================
+NSSM - the Non-Sucking Service Manager
+============================================================
+License: Public Domain / Not copyrighted
+Project URL: https://nssm.cc/
+License Text: https://nssm.cc/usage
+
+============================================================
+Inno Setup
+============================================================
+License: Inno Setup License
+Project URL: https://jrsoftware.org/isinfo.php
+License Text: https://jrsoftware.org/files/is/license.txt

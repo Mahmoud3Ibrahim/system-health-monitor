@@ -1,0 +1,43 @@
+name: build-windows
+
+on:
+  push:
+    tags: ['v*.*.*']
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller psutil
+
+      - name: Build exe
+        run: |
+          pyinstaller --onefile --name SystemHealthMonitor agent/monitor.py --add-data "config.example.json;."
+      - name: List dist
+        run: dir dist
+
+      - name: Install Inno Setup
+        run: choco install innosetup -y
+
+      - name: Build installer
+        run: ISCC.exe installer\SystemHealthMonitor.iss
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build
+          path: |
+            dist\SystemHealthMonitor.exe
+            dist\installer\SystemHealthMonitor-Setup.exe

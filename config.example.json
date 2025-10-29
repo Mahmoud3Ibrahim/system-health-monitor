@@ -1,0 +1,10 @@
+{
+  "cpu_threshold": 80,
+  "memory_threshold": 75,
+  "disk_threshold": 90,
+  "email": {
+    "sender": "you@example.com",
+    "password": "<SET_VIA_SECRET>",
+    "receiver": "admin@example.com"
+  }
+}

@@ -1,23 +1,29 @@
-# Python artifacts
+# Python
 __pycache__/
 *.pyc
-.pytest_cache/
-
-# Virtual environments
-.env/
-env/
+*.pyo
+*.pyd
 venv/
+env/
 .venv/
 
-# Credentials / large outputs
-*.env
-*.log
-system_report.csv
-report.html
-alerts.log
+# Build
+build/
+dist/
+*.spec
 
-# OS files
+# OS and IDE files
 .DS_Store
 Thumbs.db
-!system_report.csv
-!report.html
+.vscode/
+.idea/
+
+# Logs and temporary data
+*.log
+
+# Config and secrets
+config.json
+secrets.json
+
+# Installer output
+dist/installer/
